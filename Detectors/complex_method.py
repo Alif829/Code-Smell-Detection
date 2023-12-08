@@ -1,4 +1,4 @@
-def detect_complex_method(node, max_nesting_level=3, max_statement_count=10):
+def detect_complex_method(node, max_nesting_level, max_statement_count):
     
     # Detect complex method based on nesting level and statement counts within the method
 

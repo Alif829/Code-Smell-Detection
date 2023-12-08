@@ -4,7 +4,7 @@ from Detectors.large_method import detect_long_method
 from Detectors.excessive_returns import detect_excessive_returns
 from Detectors.code_duplication import detect_duplicate_code
 from Detectors.complex_method import detect_complex_method
-from Detectors.compex_lambda import detect_complex_lambda
+from Detectors.complex_lambda_function import detect_complex_lambda
 
 
 def generate_ast(code):
@@ -18,53 +18,80 @@ def detect_code_smells(code):
     tree = generate_ast(code)
     root_node = tree.root_node
 
+    # Threshold for long parameter list smell
+    parameter_threshold=3
+
+    # Threshold for excessive return statement smell
+    return_threshold=3
+
+    # Threshold for complex method
+    max_nesting_level=3
+    max_statement_count=10
+
+    # Threshold for complex lambda function smell
+    complexity=4 # complexity=num of child+ binary/boolean operators in a lambda
+
+    # Number of Child threshold for Large Method smell
+    child_threshold=15
+
+
     smells = []
 
     for node in root_node.children:
-        node_code = code[node.start_byte:node.end_byte]
 
         if node.type == 'function_definition':
-            # # Duplicated Code Smell
-            # duplicate_code_issues = detect_duplicate_code(node, code)
-            # for issue in duplicate_code_issues:
-            #     smells.append((issue, 'Duplicate Code'))
+            # Duplicated Code Smell
+            duplicate_code_issues = detect_duplicate_code(node, code)
+            for issue in duplicate_code_issues:
+                smells.append((issue, 'Duplicate Code'))
             
-            # # Long Parameter List Smell
-            # if detect_long_parameter_list(node):
-            #     smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
+            # Long Parameter List Smell
+            if detect_long_parameter_list(node, parameter_threshold):
+                smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node,parameter_threshold)])
             
-            # # Excessive Return Smell
-            # excessive_returns = detect_excessive_returns(node)
-            # if excessive_returns:
-            #     for return_node in excessive_returns:
-            #         smells.append((return_node, 'Excessive Returns'))
+            # Excessive Return Smell
+            excessive_returns = detect_excessive_returns(node, return_threshold)
+            if excessive_returns:
+                for return_node in excessive_returns:
+                    smells.append((return_node, 'Excessive Returns'))
 
             # Complex Method Smell
-            complex_method_issues = detect_complex_method(node)
+            complex_method_issues = detect_complex_method(node, max_nesting_level, max_statement_count)
             for issue in complex_method_issues:
                 smells.append((issue, 'Complex Method'))
             
-            # Complex Lambda Smell
-            complex_lambdas = detect_complex_lambda(node,1)
-            for issue in complex_lambdas:
-                smells.append(issue)
-
-            # large_method_issues = detect_long_method(node,code)
-            # for issue in large_method_issues:
-            #     smells.append((issue, 'Large Method'))
+            # Complex Lambda Functions
+            complex_lambda_issues = detect_complex_lambda(node, complexity)
+            for issue in complex_lambda_issues:
+                smells.append((issue, 'Complex Lambda'))
+            
+            # Large method smell
+            large_method_issues = detect_long_method(node,code, child_threshold)
+            for issue in large_method_issues:
+                smells.append((issue, 'Large Method'))
 
     return smells
 
 
 # Example usage
-code_sample = """
-def calculate_and_return_result(a, b):
-    result = a + b
-    # Complex Lambda (nested and long)
-    filtered_data = filter(lambda x: x["value"] > 10 and x["name"] in ["foo", "bar"], data)
-    # Another complex lambda (high depth)
-    sorted_data = sorted(data, key=lambda x: (x["value"] * 2) + (x["priority"] / 3))
-    return result
+input_code = """
+def calculate_total_price(product_price, quantity, discount, tax):
+    if discount:
+        total_price = product_price * quantity
+        total_price = total_price - (total_price * discount / 100)
+    else:
+        total_price = product_price * quantity
+        tax=product_price*0.1
+
+    if tax:
+        tax=product_price*0.1
+        total_price = product_price * quantity
+        total_price = total_price + (total_price * tax / 100)
+    else:
+        total_price = product_price * quantity
+
+    return total_price
+
 """
 
-print(detect_code_smells(code_sample))
+print(detect_code_smells(input_code))

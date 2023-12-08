@@ -1,4 +1,4 @@
-def detect_long_parameter_list(node):
+def detect_long_parameter_list(node, parameter_threshold):
     
     ##
     # In the function_definition node there are 3 children: identifier, parameters and body
@@ -13,7 +13,7 @@ def detect_long_parameter_list(node):
 
     actual_parameters = [param for param in parameters[0].children if param.type == 'identifier']
     
-    if len(actual_parameters) > 3:  # Threshold
+    if len(actual_parameters) > parameter_threshold:  # Threshold
         return actual_parameters
     
     return []
