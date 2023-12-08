@@ -2,11 +2,9 @@ import tree_sitter
 from Detectors.long_parameter_list import detect_long_parameter_list
 from Detectors.large_method import detect_long_method
 from Detectors.excessive_returns import detect_excessive_returns
-from Detectors.high_cyclomatic_complexity import detect_high_cyclomatic_complexity
-from Detectors.inconsistent_naming import detect_inconsistent_naming
 from Detectors.code_duplication import detect_duplicate_code
-from Detectors.lambda_smell import detect_complex_lambda
-
+from Detectors.complex_method import detect_complex_method
+from Detectors.compex_lambda import detect_complex_lambda
 
 
 def generate_ast(code):
@@ -26,31 +24,34 @@ def detect_code_smells(code):
         node_code = code[node.start_byte:node.end_byte]
 
         if node.type == 'function_definition':
-            #Duplicated Code Smell
-            duplicate_code_issues = detect_duplicate_code(node, code)
-            for issue in duplicate_code_issues:
-                smells.append((issue, 'Duplicate Code'))
+            # # Duplicated Code Smell
+            # duplicate_code_issues = detect_duplicate_code(node, code)
+            # for issue in duplicate_code_issues:
+            #     smells.append((issue, 'Duplicate Code'))
             
-            #Long Parameter List Smell
-            if detect_long_parameter_list(node):
-                smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
+            # # Long Parameter List Smell
+            # if detect_long_parameter_list(node):
+            #     smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
             
+            # # Excessive Return Smell
+            # excessive_returns = detect_excessive_returns(node)
+            # if excessive_returns:
+            #     for return_node in excessive_returns:
+            #         smells.append((return_node, 'Excessive Returns'))
+
+            # Complex Method Smell
+            complex_method_issues = detect_complex_method(node)
+            for issue in complex_method_issues:
+                smells.append((issue, 'Complex Method'))
+            
+            # Complex Lambda Smell
+            complex_lambdas = detect_complex_lambda(node,1)
+            for issue in complex_lambdas:
+                smells.append(issue)
+
             # large_method_issues = detect_long_method(node,code)
             # for issue in large_method_issues:
             #     smells.append((issue, 'Large Method'))
-            
-            # if detect_high_cyclomatic_complexity(code):
-            #     smells.append((node, 'High Cyclomatic Complexity'))
-            
-            # inconsistent_names = detect_inconsistent_naming(node, node_code)
-            # for naming_node in inconsistent_names:
-            #     smells.append((naming_node, 'Inconsistent Naming'))
-
-            excessive_returns = detect_excessive_returns(node)
-            if excessive_returns:
-                for return_node in excessive_returns:
-                    smells.append((return_node, 'Excessive Returns'))
-
 
     return smells
 
@@ -58,15 +59,12 @@ def detect_code_smells(code):
 # Example usage
 code_sample = """
 def calculate_and_return_result(a, b):
-    if a > b:
-        result = a + b
-        return result
-    elif a < b:
-        result = a - b
-        return result
-    else:
-        result = a * b
-        return result
+    result = a + b
+    # Complex Lambda (nested and long)
+    filtered_data = filter(lambda x: x["value"] > 10 and x["name"] in ["foo", "bar"], data)
+    # Another complex lambda (high depth)
+    sorted_data = sorted(data, key=lambda x: (x["value"] * 2) + (x["priority"] / 3))
+    return result
 """
 
 print(detect_code_smells(code_sample))
