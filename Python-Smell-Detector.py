@@ -23,9 +23,15 @@ def detect_code_smells(code):
 
     for node in root_node.children:
         node_code = code[node.start_byte:node.end_byte]
+
         if node.type == 'function_definition':
-            # if detect_long_parameter_list(node):
-            #     smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
+            # Duplicated Code Smell
+            # duplicate_code_issues = detect_duplicate_code(node, code)
+            # for issue in duplicate_code_issues:
+            #     smells.append((issue, 'Duplicate Code'))
+            
+            if detect_long_parameter_list(node):
+                smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
             
             # large_method_issues = detect_long_method(node,code)
             # for issue in large_method_issues:
@@ -42,10 +48,6 @@ def detect_code_smells(code):
             # if excessive_returns:
             #     for return_node in excessive_returns:
             #         smells.append((return_node, 'Excessive Returns'))
-            
-            duplicate_code_issues = detect_duplicate_code(node, code)
-            for issue in duplicate_code_issues:
-                smells.append((issue, 'Duplicate Code'))
 
 
     return smells

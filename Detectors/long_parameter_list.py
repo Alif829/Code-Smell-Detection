@@ -1,4 +1,12 @@
 def detect_long_parameter_list(node):
+    
+    ##
+    # In the function_definition node there are 3 children: identifier, parameters and body
+    # Parameter children are identifiers. They are the actual children
+    # # 
+
+    ## long parameter smell if parameters count>5 (usually)
+    
     parameters = [child for child in node.children if child.type == 'parameters']
     if not parameters:
         return []
