@@ -5,6 +5,7 @@ from Detectors.excessive_returns import detect_excessive_returns
 from Detectors.high_cyclomatic_complexity import detect_high_cyclomatic_complexity
 from Detectors.inconsistent_naming import detect_inconsistent_naming
 from Detectors.code_duplication import detect_duplicate_code
+from Detectors.lambda_smell import detect_complex_lambda
 
 
 
@@ -25,11 +26,12 @@ def detect_code_smells(code):
         node_code = code[node.start_byte:node.end_byte]
 
         if node.type == 'function_definition':
-            # Duplicated Code Smell
-            # duplicate_code_issues = detect_duplicate_code(node, code)
-            # for issue in duplicate_code_issues:
-            #     smells.append((issue, 'Duplicate Code'))
+            #Duplicated Code Smell
+            duplicate_code_issues = detect_duplicate_code(node, code)
+            for issue in duplicate_code_issues:
+                smells.append((issue, 'Duplicate Code'))
             
+            #Long Parameter List Smell
             if detect_long_parameter_list(node):
                 smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
             
@@ -44,10 +46,10 @@ def detect_code_smells(code):
             # for naming_node in inconsistent_names:
             #     smells.append((naming_node, 'Inconsistent Naming'))
 
-            # excessive_returns = detect_excessive_returns(node)
-            # if excessive_returns:
-            #     for return_node in excessive_returns:
-            #         smells.append((return_node, 'Excessive Returns'))
+            excessive_returns = detect_excessive_returns(node)
+            if excessive_returns:
+                for return_node in excessive_returns:
+                    smells.append((return_node, 'Excessive Returns'))
 
 
     return smells
@@ -55,22 +57,16 @@ def detect_code_smells(code):
 
 # Example usage
 code_sample = """
-def calculate_total_price(product_price, quantity, discount, tax):
-    if discount:
-        total_price = product_price * quantity
-        total_price = total_price - (total_price * discount / 100)
+def calculate_and_return_result(a, b):
+    if a > b:
+        result = a + b
+        return result
+    elif a < b:
+        result = a - b
+        return result
     else:
-        total_price = product_price * quantity
-        tax=product_price*0.1
-
-    if tax:
-        tax=product_price*0.1
-        total_price = product_price * quantity
-        total_price = total_price + (total_price * tax / 100)
-    else:
-        total_price = product_price * quantity
-
-    return total_price
+        result = a * b
+        return result
 """
 
 print(detect_code_smells(code_sample))

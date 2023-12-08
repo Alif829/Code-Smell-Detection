@@ -5,8 +5,8 @@ def detect_long_parameter_list(node):
     # Parameter children are identifiers. They are the actual children
     # # 
 
-    ## long parameter smell if parameters count>5 (usually)
-    
+    ## Long parameter smell if parameters count>5 (usually)
+
     parameters = [child for child in node.children if child.type == 'parameters']
     if not parameters:
         return []
