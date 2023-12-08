@@ -29,7 +29,7 @@ def detect_code_smells(code):
     max_statement_count=10
 
     # Threshold for complex lambda function smell
-    complexity=4 # complexity=num of child+ binary/boolean operators in a lambda
+    complexity=3 # complexity=num of child+ binary/boolean operators in a lambda
 
     # Number of Child threshold for Large Method smell
     child_threshold=15
@@ -75,22 +75,13 @@ def detect_code_smells(code):
 
 # Example usage
 input_code = """
-def calculate_total_price(product_price, quantity, discount, tax):
-    if discount:
-        total_price = product_price * quantity
-        total_price = total_price - (total_price * discount / 100)
-    else:
-        total_price = product_price * quantity
-        tax=product_price*0.1
+def process_data(data, threshold):
+    filtered_data = filter(lambda x: x["value"] > threshold and (x["name"] == "foo" or x["priority"] > 10), data)
+    funcs = [lambda x: x + i for i in range(3)]
+    sorted_data = sorted(filtered_data, key=lambda x: ((x["value"] * 2) + (x["priority"] / 3)) * (1 if x["active"] else -1))
+    return sorted_data
 
-    if tax:
-        tax=product_price*0.1
-        total_price = product_price * quantity
-        total_price = total_price + (total_price * tax / 100)
-    else:
-        total_price = product_price * quantity
-
-    return total_price
+result = process_data(data, 10)
 
 """
 
