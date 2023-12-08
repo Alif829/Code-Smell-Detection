@@ -24,24 +24,24 @@ def detect_code_smells(code):
     for node in root_node.children:
         node_code = code[node.start_byte:node.end_byte]
         if node.type == 'function_definition':
-            if detect_long_parameter_list(node):
-                smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
+            # if detect_long_parameter_list(node):
+            #     smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node)])
             
-            large_method_issues = detect_long_method(node,code)
-            for issue in large_method_issues:
-                smells.append((issue, 'Large Method'))
+            # large_method_issues = detect_long_method(node,code)
+            # for issue in large_method_issues:
+            #     smells.append((issue, 'Large Method'))
             
-            if detect_high_cyclomatic_complexity(code):
-                smells.append((node, 'High Cyclomatic Complexity'))
+            # if detect_high_cyclomatic_complexity(code):
+            #     smells.append((node, 'High Cyclomatic Complexity'))
             
-            inconsistent_names = detect_inconsistent_naming(node, node_code)
-            for naming_node in inconsistent_names:
-                smells.append((naming_node, 'Inconsistent Naming'))
+            # inconsistent_names = detect_inconsistent_naming(node, node_code)
+            # for naming_node in inconsistent_names:
+            #     smells.append((naming_node, 'Inconsistent Naming'))
 
-            excessive_returns = detect_excessive_returns(node)
-            if excessive_returns:
-                for return_node in excessive_returns:
-                    smells.append((return_node, 'Excessive Returns'))
+            # excessive_returns = detect_excessive_returns(node)
+            # if excessive_returns:
+            #     for return_node in excessive_returns:
+            #         smells.append((return_node, 'Excessive Returns'))
             
             duplicate_code_issues = detect_duplicate_code(node, code)
             for issue in duplicate_code_issues:
