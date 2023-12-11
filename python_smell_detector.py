@@ -1,4 +1,7 @@
 import tree_sitter
+
+from generate_ast import generate_ast
+
 from Detectors.long_parameter_list import detect_long_parameter_list
 from Detectors.large_method import detect_long_method
 from Detectors.excessive_returns import detect_excessive_returns
@@ -7,12 +10,6 @@ from Detectors.complex_method import detect_complex_method
 from Detectors.complex_lambda_function import detect_complex_lambda
 
 
-def generate_ast(code):
-    PYTHON_LANGUAGE = tree_sitter.Language('E:/tree-sitter-python/tree-sitter-python.dll', 'python')
-    parser = tree_sitter.Parser()
-    parser.set_language(PYTHON_LANGUAGE)
-    tree = parser.parse(bytes(code, "utf8"))
-    return tree
 
 def detect_code_smells(code):
     tree = generate_ast(code)
@@ -36,6 +33,7 @@ def detect_code_smells(code):
 
 
     smells = []
+    
 
     for node in root_node.children:
 
@@ -44,26 +42,31 @@ def detect_code_smells(code):
             duplicate_code_issues = detect_duplicate_code(node, code)
             for issue in duplicate_code_issues:
                 smells.append((issue, 'Duplicate Code'))
+                
             
             # Long Parameter List Smell
             if detect_long_parameter_list(node, parameter_threshold):
                 smells.extend([(smell_node, 'Long Parameter List') for smell_node in detect_long_parameter_list(node,parameter_threshold)])
+                
             
             # Excessive Return Smell
             excessive_returns = detect_excessive_returns(node, return_threshold)
             if excessive_returns:
                 for return_node in excessive_returns:
                     smells.append((return_node, 'Excessive Returns'))
+                    
 
             # Complex Method Smell
             complex_method_issues = detect_complex_method(node, max_nesting_level, max_statement_count)
             for issue in complex_method_issues:
                 smells.append((issue, 'Complex Method'))
+                
             
             # Complex Lambda Functions
             complex_lambda_issues = detect_complex_lambda(node, complexity)
             for issue in complex_lambda_issues:
                 smells.append((issue, 'Complex Lambda'))
+                
             
             # Large method smell
             large_method_issues = detect_long_method(node,code, child_threshold)
@@ -86,3 +89,4 @@ result = process_data(data, 10)
 """
 
 print(detect_code_smells(input_code))
+
