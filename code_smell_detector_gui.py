@@ -1,8 +1,12 @@
 import customtkinter as ctk
+import tree_sitter
 import tkinter as tk
 from generate_ast import generate_ast
 from customtkinter import *
 from PIL import Image
+from py2cfg import CFGBuilder
+from generate_smell_tree import generate_ast_graph
+from tkinter import filedialog, PhotoImage
 
 from Detectors.long_parameter_list import detect_long_parameter_list
 from Detectors.large_method import detect_long_method
@@ -10,6 +14,18 @@ from Detectors.excessive_returns import detect_excessive_returns
 from Detectors.code_duplication import detect_duplicate_code
 from Detectors.complex_method import detect_complex_method
 from Detectors.complex_lambda_function import detect_complex_lambda
+
+
+def display_ast_image(image_path):
+    # Function to display the AST image in the GUI
+    try:
+        ast_img = PhotoImage(file=image_path)
+        ast_label = ctk.CTkLabel(middle_frame, image=ast_img)
+        ast_label.image = ast_img  # reference to avoid garbage collection
+        ast_label.pack(pady=10)
+    except Exception as e:
+        ctk.messagebox.showerror("Error", str(e))
+
 
 def detect_smells():
     code = code_input.get("1.0", tk.END)
@@ -25,6 +41,7 @@ def detect_smells():
         child_thresh = int(child_threshold.get())
 
         smells = []
+        smell_nodes=[]
         for node in root_node.children:
             if node.type == 'function_definition':
                 duplicate_code_issues = detect_duplicate_code(node, code)
@@ -50,22 +67,30 @@ def detect_smells():
                 large_method_issues = detect_long_method(node, code, child_thresh)
                 for issue in large_method_issues:
                     smells.append((issue, 'Large Method'))
-
+        
+        
         result_output.delete("1.0", tk.END)
         result_output.insert(tk.INSERT, smells)
+        # generate_ast_graph and display the AST image
+        ast_image_path = 'ast_graph.png'  # Path where the AST image will be saved
+        language = tree_sitter.Language('E:/tree-sitter-python/tree-sitter-python.dll', 'python')
+        graph = generate_ast_graph(code, language,smells)
+        graph.render(ast_image_path, format='png', view=False)
+
+        display_ast_image(ast_image_path)
     except Exception as e:
         ctk.messagebox.showerror("Error", str(e))
 
 
-# Set up the main application window
-ctk.set_appearance_mode("Dark")  # Set dark theme
+# main application window set up
+ctk.set_appearance_mode("Dark")  # dark theme
 root = ctk.CTk()
 root.title("Code Smell Detector")
 
 root.grid_rowconfigure(0, weight=1)
 root.grid_columnconfigure(1, weight=1)
 
-# Create frames
+# Frames
 left_frame = ctk.CTkFrame(root)
 middle_frame = ctk.CTkFrame(root)
 right_frame = ctk.CTkFrame(root)
@@ -79,7 +104,7 @@ middle_frame.grid_rowconfigure(0, weight=1)
 middle_frame.grid_columnconfigure(0, weight=1)
 right_frame.grid_columnconfigure(0, weight=1)
 
-# Left Frame - List of code smells
+# List of code smells
 logo_img_data = Image.open("Icons/logo.png")
 logo_img = CTkImage(dark_image=logo_img_data, light_image=logo_img_data, size=(77.68, 85.42))
 
@@ -111,13 +136,13 @@ person_img = CTkImage(dark_image=person_img_data, light_image=person_img_data)
 CTkButton(master=left_frame,width=200, image=person_img, text="Long Parameter List", fg_color="transparent", font=("Arial Bold", 14), hover_color="#207244", anchor="w").pack(anchor="center", ipady=5, pady=(16, 0))
 
 
-# Middle Frame - Code input and output
+# Code input and output
 code_input = ctk.CTkTextbox(middle_frame, height=300,width=900,scrollbar_button_color="#FFCC70",corner_radius=16)
 code_input.pack(pady=10)
 result_output = ctk.CTkTextbox(middle_frame, height=200,width=900,scrollbar_button_color="#FFCC70",corner_radius=16)
 result_output.pack(pady=10)
 
-# Right Frame - Threshold inputs
+# Threshold inputs
 parameter_threshold = ctk.CTkEntry(right_frame, width=200)
 return_threshold = ctk.CTkEntry(right_frame, width=200)
 max_nesting_level = ctk.CTkEntry(right_frame, width=200)
@@ -125,7 +150,7 @@ max_statement_count = ctk.CTkEntry(right_frame, width=200)
 complexity = ctk.CTkEntry(right_frame, width=200)
 child_threshold = ctk.CTkEntry(right_frame, width=200)
 
-# Place threshold entries with labels
+# threshold entries with labels
 ctk.CTkLabel(right_frame, text="Parameter Threshold:").pack()
 parameter_threshold.pack(pady=2)
 ctk.CTkLabel(right_frame, text="Return Threshold:").pack()
@@ -139,12 +164,12 @@ complexity.pack(pady=2)
 ctk.CTkLabel(right_frame, text="Child Threshold:").pack()
 child_threshold.pack(pady=2)
 
-# Create and configure the Detect button
+# Detect button
 detect_button = ctk.CTkButton(middle_frame, text="Detect Smells", fg_color="#207244", command=detect_smells)
 detect_button.pack(side="left", padx=90)  # Place it to the left
 
 
-# Create a function to handle file selection and input
+# handle file selection and input
 def open_file():
     file_path = filedialog.askopenfilename(filetypes=[("Python files", "*.py")])
     if file_path:
@@ -152,10 +177,9 @@ def open_file():
             code_input.delete("1.0", tk.END)
             code_input.insert(tk.END, file.read())
 
-# Create a "Open File" button to trigger the file dialog
+# "Open File" button to trigger the file dialog
 open_file_button = ctk.CTkButton(middle_frame, text="Open File", fg_color="#207244", command=open_file)
-open_file_button.pack(side="right", padx=100)  # Place it to the left
-
+open_file_button.pack(side="right", padx=100)
 
 
 root.mainloop()
