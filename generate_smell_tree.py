@@ -2,10 +2,7 @@ import tree_sitter
 from graphviz import Digraph
 
 def traverse_and_create_graph(node, graph, highlighted_nodes, parent=None):
-    """
-    Recursively traverse the AST and add nodes and edges to the Graphviz graph.
-    Nodes in the highlighted_nodes list will be colored red.
-    """
+
     # Determine the color of the node
     color = "red" if node.type in highlighted_nodes else "black"
 
@@ -23,10 +20,6 @@ def traverse_and_create_graph(node, graph, highlighted_nodes, parent=None):
             traverse_and_create_graph(child, graph, highlighted_nodes, current_node_name)
 
 def generate_ast_graph(source_code, language, highlighted_nodes):
-    """
-    Generate an AST from the source code and create a graphical representation.
-    Nodes in the highlighted_nodes list will be colored red.
-    """
     # Load the language parser
     parser = tree_sitter.Parser()
     parser.set_language(language)
