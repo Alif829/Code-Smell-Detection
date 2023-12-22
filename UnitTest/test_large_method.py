@@ -1,4 +1,3 @@
-
 import sys
 sys.path.append('E:/Code-Smell-Detection')
 import pytest
