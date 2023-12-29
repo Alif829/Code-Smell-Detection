@@ -41,7 +41,6 @@ def detect_smells():
         child_thresh = int(child_threshold.get())
 
         smells = []
-        smell_nodes=[]
         for node in root_node.children:
             if node.type == 'function_definition':
                 duplicate_code_issues = detect_duplicate_code(node, code)
